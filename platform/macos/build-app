@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cargo build --release
+cp ./target/release/installer "./platform/macos/Yomitan API (rs) Installer.app/Contents/MacOS"

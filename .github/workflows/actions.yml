@@ -2,9 +2,9 @@ name: Create binaries
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -20,7 +20,15 @@ jobs:
     
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@stable
-    
+
+    - name: Build (macOS)
+      if: matrix.os == 'macos-latest'
+      run: ./platform/macos/build-app
+
+    - name: Build (non-macOS)
+      if: matrix.os != 'macos-latest'
+      run: cargo build --release
+
     - name: Build
       run: cargo build --release
     
@@ -37,7 +45,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: macos-build
-        path: target/release/installer
+        path: 'platform/macos/Yomitan API (rs) Installer.app'
         if-no-files-found: error
     
     - name: Upload artifacts (Windows x86_64)

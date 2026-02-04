@@ -1,15 +1,16 @@
 use std::path::PathBuf;
 use std::env;
 use std::io;
-use std::io::Write;
 use std::fs;
 use serde_json::json;
 use std::path::Path;
 
+pub const CLIENT_BINARY: &[u8] = include_bytes!(env!("CLIENT_BINARY_PATH"));
+
 const NAME: &str = "yomitan_api";
 
 #[derive(Clone, Copy)]
-enum Browser {
+pub enum Browser {
     Firefox,
     Chrome,
     #[cfg(not(target_os = "windows"))]
@@ -20,7 +21,7 @@ enum Browser {
 }
 
 impl Browser {
-    const VALUES: &[Self] = &[
+    pub const VALUES: &[Self] = &[
         Self::Firefox,
         Self::Chrome,
         #[cfg(not(target_os = "windows"))]
@@ -30,7 +31,7 @@ impl Browser {
         Self::Edge,
     ];
 
-    fn name(&self) -> &'static str {
+    pub fn name(&self) -> &'static str {
         match self {
             Self::Firefox => "firefox",
             Self::Chrome => "chrome",
@@ -49,7 +50,7 @@ impl Browser {
         }
     }
 
-    fn extension_id(&self) -> &'static str {
+    pub fn extension_id(&self) -> &'static str {
         match self {
             Self::Firefox => "{6b733b82-9261-47ee-a595-2dda294a4d08}",
             _ => "chrome-extension://likgccmbimhjbgkjambclfkhldnlhbnn/",
@@ -102,28 +103,29 @@ impl Browser {
             Self::Edge => "SOFTWARE\\Microsoft\\Edge\\NativeMessagingHosts\\yomitan_api",
         }
     }
-}
 
-fn prompt(prompt: &str) -> io::Result<String> {
-    print!("{}", prompt);
-    io::stdout().flush()?;
-    let mut input = String::new();
-    io::stdin().read_line(&mut input)?;
-    Ok(input.trim().to_string())
+    pub fn install_api(self, extension_ids: &[&str]) -> io::Result<()> {
+        let client_path = install_client_binary(self)?;
+        let _manifest_path = install_manifest(self, &client_path, extension_ids)?;
+        #[cfg(target_os = "windows")]
+        install_registry(self, &_manifest_path)?;
+
+        Ok(())
+    }
 }
 
 fn install_client_binary(browser: Browser) -> io::Result<PathBuf> {
-    let dir = env::current_exe()?.parent().unwrap().to_path_buf();
-
-    #[cfg(target_os = "windows")]
-    let client_path = dir.join("client.exe");
-    #[cfg(not(target_os = "windows"))]
-    let client_path = dir.join("client");
-
     let install_path = browser.install_path();
     fs::create_dir_all(&install_path)?;
     let binary_path = install_path.join("yomitan-api-rs-client");
-    fs::copy(&client_path, &binary_path)?;
+    fs::write(&binary_path, CLIENT_BINARY)?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms = fs::metadata(&binary_path)?.permissions();
+        perms.set_mode(0o755);
+        fs::set_permissions(&binary_path, perms)?;
+    }
 
     Ok(binary_path)
 }
@@ -153,48 +155,4 @@ fn install_manifest(browser: Browser, client_path: &Path, extension_ids: &[&str]
     fs::write(&manifest_path, manifest)?;
 
     Ok(manifest_path)
-}
-
-// TODO: support multiple extension ids
-// TODO: should open in terminal on macos?
-// TODO: on windows, make sure window stays open after error
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("yomitan-api-rs installer {}", env!("CARGO_PKG_VERSION"));
-
-    println!("Select browser:");
-    for (i, browser) in Browser::VALUES.iter().enumerate() {
-        println!("\t{}: {}", i + 1, browser.name());
-    }
-    println!("");
-    println!("Don't see your browser or the installation doesn't appear to work? Open an issue at https://github.com/aura-ix/yomitan-api-rs");
-    println!("");
-    
-    let browser = loop {
-        if let Ok(choice) = prompt("Choice (enter corresponding number): ")?.parse::<usize>() && choice >= 1 && choice <= Browser::VALUES.len() {
-            break Browser::VALUES[choice - 1];
-        } else {
-            println!("Invalid input, must be a number 1 - {}.", Browser::VALUES.len());
-            continue
-        }
-    };
-
-    println!("");
-    println!("If you are using a development version of yomitan, enter your extension ID now. Otherwise, hit enter to skip this step.");
-    println!("");
-
-    let choice = prompt("Extension ID (enter to use default): ")?;
-    let extension_id = if choice.len() == 0 {
-        browser.extension_id()
-    } else {
-        &choice
-    };
-
-    let client_path = install_client_binary(browser)?;
-    let _manifest_path = install_manifest(browser, &client_path, &[extension_id])?;
-    #[cfg(target_os = "windows")]
-    install_registry(browser, &_manifest_path)?;
-
-
-    let _ = prompt("Installation complete. Hit enter to exit.");
-    Ok(())
 }

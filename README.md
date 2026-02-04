@@ -9,8 +9,6 @@ Please open an issue or pull request if you have successfully installed it on an
 
 ## TODO
 - Support for custom installation parameters
-- Support for usage as a library
 - Test on all supported browsers/OS pairs
 - Uninstallation
-- Monolithic installation binary
 - Github actions executables

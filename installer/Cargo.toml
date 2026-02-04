@@ -1,0 +1,25 @@
+[package]
+name = "yomitan-api-rs"
+version = "0.4.0"
+edition = "2024"
+
+[features]
+building-client = []
+
+[lib]
+name = "yomitan_api_installer"
+path = "src/lib.rs"
+
+[[bin]]
+name = "installer"
+path = "src/installer.rs"
+
+[dependencies]
+chrono = "0.4.43"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+tiny_http = "0.12"
+urlencoding = "2.1"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.55.0"

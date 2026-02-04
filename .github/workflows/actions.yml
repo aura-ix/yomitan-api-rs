@@ -29,7 +29,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: linux-build
-        path: target/release/*
+        path: target/release/installer
         if-no-files-found: error
     
     - name: Upload artifacts (macOS)
@@ -37,7 +37,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: macos-build
-        path: target/release/*
+        path: target/release/installer
         if-no-files-found: error
     
     - name: Upload artifacts (Windows)
@@ -45,5 +45,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: windows-build
-        path: target/release/*
+        path: target/release/installer.exe
         if-no-files-found: error

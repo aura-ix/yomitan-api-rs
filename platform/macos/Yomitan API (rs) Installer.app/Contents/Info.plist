@@ -12,6 +12,9 @@
   <key>CFBundleIdentifier</key>
   <string>com.aura-ix.yomitan-api-rs-installer</string>
 
+  <key>CFBundleIconFile</key>
+  <string>icon</string>
+
   <key>CFBundleVersion</key>
   <string>1.0</string>
 

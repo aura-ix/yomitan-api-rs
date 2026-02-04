@@ -12,7 +12,6 @@ fn prompt(prompt: &str) -> io::Result<String> {
     Ok(input.trim().to_string())
 }
 
-// TODO: should open in terminal on macos?
 // TODO: on windows, make sure window stays open after error
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("yomitan-api-rs installer {}", env!("CARGO_PKG_VERSION"));

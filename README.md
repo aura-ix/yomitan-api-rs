@@ -8,7 +8,8 @@ An implementation of the native messaging component and it's installer for yomit
 Please open an issue or pull request if you have successfully installed it on another platform!
 
 ## TODO
+- Full installation guide
+- Release executables
 - Support for custom installation parameters
 - Test on all supported browsers/OS pairs
 - Uninstallation
-- Github actions executables

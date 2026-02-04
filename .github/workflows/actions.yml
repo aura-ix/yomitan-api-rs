@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest, windows-11-arm]
     
     runs-on: ${{ matrix.os }}
     
@@ -40,10 +40,18 @@ jobs:
         path: target/release/installer
         if-no-files-found: error
     
-    - name: Upload artifacts (Windows)
+    - name: Upload artifacts (Windows x86_64)
       if: matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: windows-build
+        name: windows-build-x86_64
+        path: target/release/installer.exe
+        if-no-files-found: error
+    
+    - name: Upload artifacts (Windows arm64)
+      if: matrix.os == 'windows-11-arm'
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-build-arm64
         path: target/release/installer.exe
         if-no-files-found: error

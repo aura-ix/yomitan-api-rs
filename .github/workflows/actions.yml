@@ -46,8 +46,8 @@ jobs:
       with:
         name: macos-build
         path: |
-          'platform/macos/Yomitan API (rs) Installer.app'
-          'platform/macos/README.txt'
+          platform/macos/Yomitan API (rs) Installer.app
+          platform/macos/README.txt
         if-no-files-found: error
     
     - name: Upload artifacts (Windows x86_64)

@@ -12,8 +12,7 @@ fn prompt(prompt: &str) -> io::Result<String> {
     Ok(input.trim().to_string())
 }
 
-// TODO: on windows, make sure window stays open after error
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn try_install() -> Result<(), Box<dyn std::error::Error>> {
     println!("yomitan-api-rs installer {}", env!("CARGO_PKG_VERSION"));
 
     println!("Select browser:");
@@ -46,4 +45,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let _ = prompt("Installation complete. Hit enter to exit.");
     Ok(())
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    loop {
+        match try_install() {
+            Ok(()) => break Ok(()),
+            Err(err) => {
+                println!("Encountered error: {}", err);
+
+                #[cfg(target_os = "windows")]
+                println!("You should make sure that your browser is fully closed, and wait a minute or so before trying to install again. Otherwise the files that need to be modified may be in use by the browser.");
+
+                if prompt("Try again? (enter to quit, 'y' to try again)")?.len() == 0 {
+                    break Err(err)
+                }
+            }
+        }
+    }
 }

@@ -5,6 +5,8 @@ use std::fs;
 use serde_json::json;
 use std::path::Path;
 
+// TODO: should probably put the native messaging host manifest in it's own folder
+
 pub const CLIENT_BINARY: &[u8] = include_bytes!(env!("CLIENT_BINARY_PATH"));
 
 const NAME: &str = "yomitan_api";
